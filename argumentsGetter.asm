@@ -1,7 +1,7 @@
-; Name:     main.asm
-; Assemble: nasm -f elf main.asm
-; Link:     ld -m elf_i386 -s -o dagda main.o
-; Run:      ./dragda arg1
+; Name:     argumentsGetter.asm
+; Assemble: nasm -f elf argumentsGetter.asm
+; Link:     ld -m elf_i386 -s -o argumentsGetter argumentsGetter.o
+; Run:      ./argumentsGetter arg1
 
 section .data
     line_feed dw 10
