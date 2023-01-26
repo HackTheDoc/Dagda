@@ -22,13 +22,8 @@ _start:
     xor ebx, ebx
     int 0x80
 
-print_string:
-    pusha
-
-    .J0:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, esi
+; store length in edx register
+get_string_length:
     xor edx, edx
 
     .J1:
@@ -39,21 +34,33 @@ print_string:
     jmp .J1
 
     .J2:
+    ret
+; print a string stored in esi register
+print_string:
+    pusha
+
+    .J0:
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, esi
+    call get_string_length
     int 0x80
     popa
     ret
 
+; convert a string to integer from the esi register to the edx register
 string_to_int:
     xor edi, edi
     xor eax, eax
 
+    ; convertion loop
     .S0:
         mov dl, [esi]
-        cmp dl, 0      ; are we at the end of the string ?
+        cmp dl, 0       ; are we at the end of the string ?
         je .S1          ; if yes, exit the convertion loop
         sub dl, '0'     ; get integer value
     
-        mov ebx, eax
+        mov ebx, eax    ; multiply by ten
         add ebx, eax
         add ebx, eax
         add ebx, eax
@@ -64,15 +71,19 @@ string_to_int:
         add ebx, eax
         add eax, ebx
 
-        add eax, edx
+        add eax, edx    ; add unit number
 
         inc esi         ; increment pointer position in the string
         jmp .S0
     
+    ; conversion end
     .S1:
     mov edx, eax
     ret
 
+; convert a decimal number to it's binary value 
+; it use the decimal string from .data section
+; display the result on screen
 decimal_to_binary:
     ; get integer value of the decimal number to convert
     mov esi, decimal
@@ -82,6 +93,8 @@ decimal_to_binary:
     mov eax, edx
     mov ebx, 2
     mov ecx, 0
+
+    ; convertion loop
     .do:
         xor edx, edx
         div ebx
@@ -91,12 +104,35 @@ decimal_to_binary:
         cmp eax, 0
         jnz .do
     
-
-    ; print convertion result
+    ; reverse string
     mov esi, binary
-    call print_string
+    call get_string_length
 
-    mov esi, line_feed
-    call print_string
+    ; init pointers
+    xor esi, esi
+    mov esi, edx
+    shr esi, 1
+
+    xor edi, edi
+    mov edi, edx
+    dec edi
+    sub edi, esi
+
+    .reverse:
+        mov al, byte [binary + esi]
+        mov ah, byte [binary + edi]
+        mov byte [binary + esi], ah
+        mov byte [binary + edi], al
+        inc edi
+        dec esi
+        cmp esi, 0
+        jnz .reverse
+        
+    .print:
+        mov esi, binary
+        call print_string
+
+        mov esi, line_feed
+        call print_string
 
     ret
