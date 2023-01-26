@@ -18,6 +18,7 @@ section .text
 _start:
     call decimal_to_binary
 
+    ; exit program
     mov eax, 1
     xor ebx, ebx
     int 0x80
